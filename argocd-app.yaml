@@ -9,7 +9,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/ciphernerd11/gitops-aks-microservices.git   # ← Update with your repo URL
+    repoURL: https://github.com/ciphernerd11/gitops-aks-microservices.git
     targetRevision: main
     path: kube
 
