@@ -23,57 +23,32 @@ resource "azurerm_resource_group" "main" {
 }
 
 # ─────────────────────────────────────────────────────
-# 2. Azure Container Registry (ACR)
+# 2. Azure Container Registry (ACR) Module
 # ─────────────────────────────────────────────────────
 
-resource "azurerm_container_registry" "acr" {
-  name                = replace("acr${local.resource_prefix}", "-", "")
+module "acr" {
+  source = "./modules/acr"
+
+  resource_prefix     = local.resource_prefix
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  sku                 = var.acr_sku
-  admin_enabled       = false
-
-  tags = local.common_tags
+  acr_sku             = var.acr_sku
+  tags                = local.common_tags
 }
 
 # ─────────────────────────────────────────────────────
-# 3. Azure Kubernetes Service (AKS)
+# 3. Azure Kubernetes Service (AKS) Module
 # ─────────────────────────────────────────────────────
 
-resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "aks-${local.resource_prefix}"
-  location            = azurerm_resource_group.main.location
+module "aks" {
+  source = "./modules/aks"
+
+  resource_prefix     = local.resource_prefix
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = local.resource_prefix
+  location            = azurerm_resource_group.main.location
   kubernetes_version  = var.kubernetes_version
-
-  default_node_pool {
-    name            = "default"
-    node_count      = var.aks_node_count
-    vm_size         = var.aks_node_vm_size
-    os_disk_size_gb = 30
-  }
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  network_profile {
-    network_plugin    = "azure"
-    load_balancer_sku = "standard"
-    network_policy    = "calico"
-  }
-
-  tags = local.common_tags
-}
-
-# ─────────────────────────────────────────────────────
-# 4. Grant AKS → ACR Pull Permission
-# ─────────────────────────────────────────────────────
-
-resource "azurerm_role_assignment" "aks_acr_pull" {
-  principal_id                     = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
-  role_definition_name             = "AcrPull"
-  scope                            = azurerm_container_registry.acr.id
-  skip_service_principal_aad_check = true
+  aks_node_count      = var.aks_node_count
+  aks_node_vm_size    = var.aks_node_vm_size
+  acr_id              = module.acr.id
+  tags                = local.common_tags
 }
