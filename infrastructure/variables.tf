@@ -29,7 +29,7 @@ variable "aks_node_count" {
 variable "aks_node_vm_size" {
   description = "VM size for AKS nodes"
   type        = string
-  default     = "Standard_B2ats_v2"
+  default     = "Standard_B2s"
 }
 
 variable "kubernetes_version" {
@@ -56,8 +56,14 @@ variable "vnet_cidr" {
   default     = ["10.0.0.0/8"]
 }
 
-variable "subnet_cidr" {
-  description = "CIDR block for the AKS Subnet"
+variable "app_subnets_cidr" {
+  description = "CIDR blocks for the App Subnets"
   type        = list(string)
-  default     = ["10.240.0.0/16"]
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "db_subnets_cidr" {
+  description = "CIDR blocks for the DB Subnets"
+  type        = list(string)
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
 }

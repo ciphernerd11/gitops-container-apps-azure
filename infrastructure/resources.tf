@@ -32,7 +32,8 @@ module "network" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   vnet_cidr           = var.vnet_cidr
-  subnet_cidr         = var.subnet_cidr
+  app_subnets_cidr    = var.app_subnets_cidr
+  db_subnets_cidr     = var.db_subnets_cidr
   tags                = local.common_tags
 }
 
@@ -74,7 +75,7 @@ module "aks" {
   aks_node_count             = var.aks_node_count
   aks_node_vm_size           = var.aks_node_vm_size
   acr_id                     = module.acr.id
-  vnet_subnet_id             = module.network.subnet_id
+  vnet_subnet_id             = module.network.app_subnet_ids[0]
   log_analytics_workspace_id = module.log_analytics.workspace_id
   tags                       = local.common_tags
 }

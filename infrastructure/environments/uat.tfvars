@@ -1,16 +1,21 @@
 # ─────────────────────────────────────────────────────
-# Dev Environment — Variable Values
+# UAT Environment — Variable Values
 # ─────────────────────────────────────────────────────
 
 project_name       = "disaster-relief"
-environment        = "dev"
+environment        = "uat"
 location           = "Central India"
 aks_node_count     = 2
-aks_node_vm_size   = "Standard_B2ats_v2"
-kubernetes_version = "1.35"
-acr_sku            = "Basic"
+aks_node_vm_size   = "Standard_B2ms"
+kubernetes_version = "1.31"
+acr_sku            = "Standard"
+
+vnet_cidr        = ["10.1.0.0/16"]
+app_subnets_cidr = ["10.1.1.0/24", "10.1.2.0/24"]
+db_subnets_cidr  = ["10.1.3.0/24", "10.1.4.0/24"]
 
 tags = {
-  Owner   = "devops-team"
-  Purpose = "disaster-relief-platform"
+  Owner       = "devops-team"
+  Project     = "disaster-relief"
+  Environment = "uat"
 }

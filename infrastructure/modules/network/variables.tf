@@ -18,8 +18,13 @@ variable "vnet_cidr" {
   type        = list(string)
 }
 
-variable "subnet_cidr" {
-  description = "CIDR block for the AKS Subnet"
+variable "app_subnets_cidr" {
+  description = "CIDR blocks for the App Subnets"
+  type        = list(string)
+}
+
+variable "db_subnets_cidr" {
+  description = "CIDR blocks for the DB Subnets"
   type        = list(string)
 }
 
