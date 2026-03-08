@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: resource-api
-          image: ACR_NAME.azurecr.io/resource-api:latest
+          image: acrdisasterreliefdev.azurecr.io/resource-api:aba1b5c60a364491a372bd3c981f38f9d7bfce66
           ports:
             - containerPort: 3000
               protocol: TCP
