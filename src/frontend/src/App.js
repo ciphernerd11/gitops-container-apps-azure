@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
-const API_BASE = '';
+const API_BASE = '/api';
 const REFRESH_INTERVAL = 15000;
 
 const severityColors = {
