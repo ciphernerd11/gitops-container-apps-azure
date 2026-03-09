@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: notification-worker
-          image: acrdisasterreliefdev.azurecr.io/notification-worker:46a9fd5fd3104fff5ff2f798a169b2abda2d4dae
+          image: acrdisasterreliefdev.azurecr.io/notification-worker:74691659c9f8a84e117c0b15f02482a80be9d1c7
           env:
             - name: ALERT_API_URL
               value: http://alert-api-service:8000
