@@ -41,7 +41,7 @@ resource "azurerm_role_assignment" "terraform_kv_admin" {
 
 resource "azurerm_key_vault_secret" "postgres_password" {
   name         = "postgres-password"
-  value        = "changeme-in-production"
+  value        = "Pass@123"
   key_vault_id = azurerm_key_vault.kv.id
 
   # Ensure permissions are granted before trying to manage secrets
