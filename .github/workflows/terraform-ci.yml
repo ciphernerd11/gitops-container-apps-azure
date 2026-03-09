@@ -46,7 +46,9 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: |
+          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
+          terraform init -backend-config="key=${ENV_NAME}.tfstate"
 
       - name: Terraform Validate
         id: validate

@@ -7,8 +7,18 @@ on:
     inputs:
       confirm_destroy:
         description: 'Type "yes" to confirm destruction of all infrastructure'
-        requried: true
+        required: true
         default: "no"
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+        - dev
+        - qa
+        - uat
+        - prod
 
 env:
   ARM_CLIENT_ID: ${{secrets.AZURE_CLIENT_ID}}
@@ -33,6 +43,11 @@ jobs:
         with:
           terraform_version: "1.7.5"
       - name: Terraform Init
-        run: terraform init
+        run: |
+          # Use Environment dropdown or default to dev
+          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
+          terraform init -backend-config="key=${ENV_NAME}.tfstate"
       - name: Terraform Destroy
-        run: terraform destroy -auto-approve
+        run: |
+          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
+          terraform destroy -var-file="environments/${ENV_NAME}.tfvars" -auto-approve
