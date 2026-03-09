@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: alert-api
-          image: acrdisasterreliefdev.azurecr.io/alert-api:ceadc7d482069b48eca339c48dc4f5602017f2c3
+          image: acrdisasterreliefdev.azurecr.io/alert-api:77f25153f6e1aafecfb748fbae2d5afbfac58077
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -77,4 +77,4 @@ spec:
   template:
     spec:
       containers:
-        - image: acrdisasterreliefdev.azurecr.io/alert-api:ceadc7d482069b48eca339c48dc4f5602017f2c3
+        - image: acrdisasterreliefdev.azurecr.io/alert-api:77f25153f6e1aafecfb748fbae2d5afbfac58077
