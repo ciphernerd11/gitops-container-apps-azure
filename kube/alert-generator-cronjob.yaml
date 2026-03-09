@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
             - name: alert-generator
-              image: acrdisasterreliefdev.azurecr.io/alert-generator:6c0d0460990bdbde9069209d7656834db7d0a4d7
+              image: acrdisasterreliefdev.azurecr.io/alert-generator:86cc60a0b579c7f6eaa7e42cc9152981ad686891
               env:
                 - name: API_URL
                   value: "http://alert-api-service:8000/alerts"
