@@ -56,3 +56,8 @@ variable "tags" {
   description = "Tags for the AKS cluster"
   type        = map(string)
 }
+
+variable "vnet_id" {
+  description = "ID of the Virtual Network for role assignment"
+  type        = string
+}

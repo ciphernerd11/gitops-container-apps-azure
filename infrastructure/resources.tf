@@ -80,9 +80,9 @@ module "aks" {
   aks_node_vm_size           = var.aks_node_vm_size
   acr_id                     = module.acr.id
   key_vault_id               = module.keyvault.id
+  vnet_id                    = module.network.vnet_id
   vnet_subnet_id             = module.network.app_subnet_ids[0]
   gateway_subnet_id          = module.network.gateway_subnet_id
   log_analytics_workspace_id = module.log_analytics.workspace_id
   tags                       = local.common_tags
 }
-
