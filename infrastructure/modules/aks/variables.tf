@@ -28,8 +28,13 @@ variable "aks_node_vm_size" {
   type        = string
 }
 
-variable "acr_id" {
-  description = "ID of the ACR for role assignment"
+variable "vnet_subnet_id" {
+  description = "ID of the subnet for the AKS nodes"
+  type        = string
+}
+
+variable "gateway_subnet_id" {
+  description = "ID of the subnet for the Application Gateway"
   type        = string
 }
 
@@ -37,8 +42,8 @@ variable "key_vault_id" {
   type = string
 }
 
-variable "vnet_subnet_id" {
-  description = "The ID of the Subnet where the AKS Cluster should be deployed"
+variable "acr_id" {
+  description = "ID of the ACR for role assignment"
   type        = string
 }
 

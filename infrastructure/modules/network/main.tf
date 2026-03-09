@@ -6,6 +6,13 @@ resource "azurerm_virtual_network" "main" {
   tags                = var.tags
 }
 
+resource "azurerm_subnet" "gateway" {
+  name                 = "snet-gateway"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = [var.gateway_subnet_cidr]
+}
+
 resource "azurerm_subnet" "app" {
   count                = length(var.app_subnets_cidr)
   name                 = "snet-app-${format("%02d", count.index + 1)}"

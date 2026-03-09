@@ -34,6 +34,7 @@ module "network" {
   vnet_cidr           = var.vnet_cidr
   app_subnets_cidr    = var.app_subnets_cidr
   db_subnets_cidr     = var.db_subnets_cidr
+  gateway_subnet_cidr = var.gateway_subnet_cidr
   tags                = local.common_tags
 }
 
@@ -89,6 +90,7 @@ module "aks" {
   acr_id                     = module.acr.id
   key_vault_id               = module.keyvault.id
   vnet_subnet_id             = module.network.app_subnet_ids[0]
+  gateway_subnet_id          = module.network.gateway_subnet_id
   log_analytics_workspace_id = module.log_analytics.workspace_id
   tags                       = local.common_tags
 }
