@@ -28,6 +28,11 @@ variable "db_subnets_cidr" {
   type        = list(string)
 }
 
+variable "gateway_subnet_cidr" {
+  description = "CIDR block for the Application Gateway Subnet"
+  type        = string
+}
+
 variable "tags" {
   description = "Tags for the resources"
   type        = map(string)

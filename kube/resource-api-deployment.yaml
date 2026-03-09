@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: resource-api
-          image: acrdisasterreliefdev.azurecr.io/resource-api:6c0d0460990bdbde9069209d7656834db7d0a4d7
+          image: acrdisasterreliefdev.azurecr.io/resource-api:9b2a1edf505de3671b7fc772ca8af089e6866525
           ports:
             - containerPort: 3000
               protocol: TCP
@@ -84,10 +84,6 @@ spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: resource-api
-  ports:
-    - port: 3000
-      targetPort: 3000
-      protocol: TCP
   ports:
     - port: 3000
       targetPort: 3000

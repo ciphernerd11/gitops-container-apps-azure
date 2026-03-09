@@ -11,6 +11,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size        = var.aks_node_vm_size
     vnet_subnet_id = var.vnet_subnet_id
     os_disk_size_gb = 30
+    temporary_name_for_rotation = "tempnodepool"
   }
 
   identity {
@@ -31,6 +32,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   oms_agent {
     log_analytics_workspace_id = var.log_analytics_workspace_id
+  }
+
+  ingress_application_gateway {
+    subnet_id = var.gateway_subnet_id
   }
 
   tags = var.tags

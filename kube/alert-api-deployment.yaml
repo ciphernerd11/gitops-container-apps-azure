@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: alert-api
-          image: acrdisasterreliefdev.azurecr.io/alert-api:6c0d0460990bdbde9069209d7656834db7d0a4d7
+          image: acrdisasterreliefdev.azurecr.io/alert-api:9b2a1edf505de3671b7fc772ca8af089e6866525
           ports:
             - containerPort: 8000
               protocol: TCP
@@ -64,10 +64,6 @@ spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: alert-api
-  ports:
-    - port: 8000
-      targetPort: 8000
-      protocol: TCP
   ports:
     - port: 8000
       targetPort: 8000

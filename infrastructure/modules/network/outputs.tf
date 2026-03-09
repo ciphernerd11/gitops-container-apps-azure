@@ -12,3 +12,7 @@ output "db_subnet_ids" {
   description = "List of IDs of the DB Subnets"
   value       = azurerm_subnet.db[*].id
 }
+
+output "gateway_subnet_id" {
+  value = azurerm_subnet.gateway.id
+}
