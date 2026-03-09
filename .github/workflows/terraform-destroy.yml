@@ -25,16 +25,17 @@ on:
         default: ""
 
 env:
-  ARM_CLIENT_ID: ${{secrets.AZURE_CLIENT_ID}}
-  ARM_CLIENT_SECRET: ${{secrets.AZURE_CLIENT_SECRET}}
-  ARM_SUBSCRIPTION_ID: ${{secrets.AZURE_SUBSCRIPTION_ID}}
-  ARM_TENANT_ID: ${{secrets.AZURE_TENANT_ID}}
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
 jobs:
   terraform-destroy:
     runs-on: ubuntu-latest
     #only run the job if the user explicitly typed "yes"
-    if: ${{github.event.inputs.confirm_destroy == 'yes'}}
+    if: ${{ github.event.inputs.confirm_destroy == 'yes' }}
     defaults:
       run:
         working-directory: ./infrastructure
@@ -42,10 +43,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.7.5"
+
       - name: Terraform Init
         run: |
           # Use override if provided, otherwise default to ENV.tfstate
@@ -60,7 +63,22 @@ jobs:
           
           echo "Initializing with state key: $SELECTED_KEY"
           terraform init -backend-config="key=$SELECTED_KEY"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      - name: Get Public IP
+        id: ip
+        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
+      - name: Pre-Whitelist Runner IP (if Vault exists)
+        run: |
+          az keyvault network-rule add --name "kv-disasterreliefdev" --ip-address "${{ steps.ip.outputs.ipv4 }}" || echo "Key Vault not found, skipping pre-whitelist."
+          sleep 10
+
       - name: Terraform Destroy
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          terraform destroy -var-file="environments/${ENV_NAME}.tfvars" -auto-approve
+          terraform destroy -var-file="environments/${ENV_NAME}.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -auto-approve
