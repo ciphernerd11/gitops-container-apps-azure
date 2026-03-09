@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: resource-api
-          image: acrdisasterreliefdev.azurecr.io/resource-api:7ab9b03c24dacb33036dcf26b19f50bc13cf44c7
+          image: acrdisasterreliefdev.azurecr.io/resource-api:5c3b548cd4370b910db3f57867c0694e344570df
           ports:
             - containerPort: 3000
               protocol: TCP
@@ -61,6 +61,12 @@ spec:
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - image: null
 ---
 apiVersion: v1
 kind: Service
@@ -77,3 +83,7 @@ spec:
     - port: 3000
       targetPort: 3000
       protocol: TCP
+  template:
+    spec:
+      containers:
+        - image: acrdisasterreliefdev.azurecr.io/resource-api:5c3b548cd4370b910db3f57867c0694e344570df

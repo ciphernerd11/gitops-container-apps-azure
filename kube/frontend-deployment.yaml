@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: acrdisasterreliefdev.azurecr.io/frontend:7ab9b03c24dacb33036dcf26b19f50bc13cf44c7
+          image: acrdisasterreliefdev.azurecr.io/frontend:5c3b548cd4370b910db3f57867c0694e344570df
           ports:
             - containerPort: 80
               protocol: TCP
@@ -47,6 +47,12 @@ spec:
               port: 80
             initialDelaySeconds: 3
             periodSeconds: 10
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - image: null
 ---
 apiVersion: v1
 kind: Service
@@ -63,3 +69,7 @@ spec:
     - port: 80
       targetPort: 80
       protocol: TCP
+  template:
+    spec:
+      containers:
+        - image: acrdisasterreliefdev.azurecr.io/frontend:5c3b548cd4370b910db3f57867c0694e344570df
