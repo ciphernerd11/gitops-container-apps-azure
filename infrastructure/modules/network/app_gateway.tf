@@ -72,6 +72,11 @@ resource "azurerm_application_gateway" "main" {
     priority                   = 1
   }
 
+  ssl_policy {
+    policy_type = "Predefined"
+    policy_name = "AppGwSslPolicy20220101"
+  }
+
   lifecycle {
     ignore_changes = [
       tags,
@@ -83,6 +88,7 @@ resource "azurerm_application_gateway" "main" {
       frontend_port,
       redirect_configuration,
       ssl_certificate,
+      ssl_policy,
       url_path_map
     ]
   }
