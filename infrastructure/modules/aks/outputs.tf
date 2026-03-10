@@ -46,3 +46,7 @@ output "agic_identity_id" {
   description = "The ID of the AGIC User Assigned Identity"
   value       = azurerm_user_assigned_identity.agic.id
 }
+
+output "oidc_issuer_url" {
+  value = azurerm_kubernetes_cluster.aks.oidc_issuer_url
+}

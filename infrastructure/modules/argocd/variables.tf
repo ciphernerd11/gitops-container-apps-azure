@@ -37,3 +37,7 @@ variable "resource_group_name" {
 variable "subscription_id" {
   type = string
 }
+
+variable "oidc_issuer_url" {
+  type = string
+}

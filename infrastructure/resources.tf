@@ -105,6 +105,7 @@ module "argocd" {
   gateway_name               = module.network.gateway_name
   agic_identity_client_id    = module.aks.agic_identity_client_id
   agic_identity_id           = module.aks.agic_identity_id
+  oidc_issuer_url            = module.aks.oidc_issuer_url
 
   depends_on = [module.aks]
 }

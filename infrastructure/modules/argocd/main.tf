@@ -25,6 +25,15 @@ resource "helm_release" "argocd" {
   }
 }
 
+resource "azurerm_federated_identity_credential" "agic" {
+  name                = "fic-agic"
+  resource_group_name = var.resource_group_name
+  audience            = ["api://AzureADTokenExchange"]
+  issuer              = var.oidc_issuer_url
+  parent_id           = var.agic_identity_id
+  subject             = "system:serviceaccount:kube-system:ingress-azure"
+}
+
 resource "helm_release" "agic" {
   name       = "agic"
   chart      = "oci://mcr.microsoft.com/azure-application-gateway/charts/ingress-azure"
@@ -48,12 +57,7 @@ resource "helm_release" "agic" {
 
   set {
     name  = "armAuth.type"
-    value = "msi"
-  }
-
-  set {
-    name  = "armAuth.identityResourceID"
-    value = var.agic_identity_id
+    value = "workloadIdentity"
   }
 
   set {
@@ -66,6 +70,6 @@ resource "helm_release" "agic" {
     value = "true"
   }
 
-  depends_on = [helm_release.argocd] # Not strictly necessary but keeps it clean
+  depends_on = [helm_release.argocd, azurerm_federated_identity_credential.agic]
 }
 
