@@ -63,7 +63,3 @@ spec:
     - port: 80
       targetPort: 80
       protocol: TCP
-  template:
-    spec:
-      containers:
-        - image: acrdisasterreliefdev.azurecr.io/frontend:4cd6b16663a8067f5746677989f0edb3e8eb772e

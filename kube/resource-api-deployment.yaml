@@ -88,7 +88,3 @@ spec:
     - port: 3000
       targetPort: 3000
       protocol: TCP
-  template:
-    spec:
-      containers:
-        - image: acrdisasterreliefdev.azurecr.io/resource-api:e930122239f898ccaef0f75439d2ab34798d975e

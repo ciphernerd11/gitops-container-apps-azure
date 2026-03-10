@@ -68,7 +68,3 @@ spec:
     - port: 8000
       targetPort: 8000
       protocol: TCP
-  template:
-    spec:
-      containers:
-        - image: acrdisasterreliefdev.azurecr.io/alert-api:1ead443214e858efcf2bb93fa779249da2166c36
