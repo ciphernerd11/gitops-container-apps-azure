@@ -1,7 +1,7 @@
 resource "azurerm_dns_zone" "main" {
   name                = "disaster-relief.com"
   resource_group_name = azurerm_resource_group.main.name
-  tags                = local.common_tags
+  tags                = merge(module.tags.tags, { Name = "dns-${local.name_prefix}" })
 }
 
 # Note: The A record will be added once we have the Application Gateway Public IP.
