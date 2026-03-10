@@ -27,8 +27,7 @@ resource "helm_release" "argocd" {
 
 resource "helm_release" "agic" {
   name       = "agic"
-  repository = "https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/"
-  chart      = "ingress-azure"
+  chart      = "oci://mcr.microsoft.com/azure-application-gateway/charts/ingress-azure"
   namespace  = "kube-system"
   version    = "1.7.2"
 
