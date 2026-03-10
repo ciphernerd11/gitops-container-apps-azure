@@ -35,8 +35,8 @@ jobs:
       - run: az acr login --name $ACR_NAME
       - name: Build & Push
         run: |
-          docker build -t $REGISTRY/$SERVICE_NAME:${{ github.sha }} ./src/$SERVICE_NAME
-          docker push $REGISTRY/$SERVICE_NAME:${{ github.sha }}
+          docker build -t $REGISTRY/$SERVICE_NAME:$SERVICE_NAME-${{ github.sha }} ./src/$SERVICE_NAME
+          docker push $REGISTRY/$SERVICE_NAME:$SERVICE_NAME-${{ github.sha }}
 
   update-manifest:
     needs: build-push
@@ -52,7 +52,7 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
       - name: Update Tag
         run: |
-          yq -i '.spec.jobTemplate.spec.template.spec.containers[0].image = "'$REGISTRY'/'$SERVICE_NAME':'${{ github.sha }}'"' kube/$SERVICE_NAME/alert-generator-cronjob.yaml
+          yq -i '.spec.jobTemplate.spec.template.spec.containers[0].image = "'$REGISTRY'/'$SERVICE_NAME':'$SERVICE_NAME'-'${{ github.sha }}'"' kube/$SERVICE_NAME/alert-generator-cronjob.yaml
       - name: Commit & Push
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
