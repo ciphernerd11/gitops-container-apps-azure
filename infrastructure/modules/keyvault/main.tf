@@ -48,7 +48,7 @@ resource "azurerm_key_vault" "kv" {
 
   public_network_access_enabled = true # Required to allow traffic to reach the firewall rules
 
-  tags = var.tags
+  tags = merge(var.tags, { Name = "kv-${substr(replace(var.resource_prefix, "-", ""), 0, 20)}" })
 }
 
 data "azurerm_client_config" "current" {}

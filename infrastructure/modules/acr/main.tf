@@ -5,5 +5,5 @@ resource "azurerm_container_registry" "acr" {
   sku                 = var.acr_sku
   admin_enabled       = false
 
-  tags = var.tags
+  tags = merge(var.tags, { Name = replace("acr${var.resource_prefix}", "-", "") })
 }

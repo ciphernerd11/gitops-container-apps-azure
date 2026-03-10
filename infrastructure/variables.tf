@@ -79,3 +79,15 @@ variable "allowed_ips" {
   type        = list(string)
   default     = []
 }
+
+variable "owner" {
+  description = "Owner of the resources"
+  type        = string
+  default     = "devops-team"
+}
+
+variable "cost_center" {
+  description = "Cost center for the project"
+  type        = string
+  default     = "CC-101"
+}

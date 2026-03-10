@@ -38,7 +38,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     subnet_id = var.gateway_subnet_id
   }
 
-  tags = var.tags
+  tags = merge(var.tags, { Name = "aks-${var.resource_prefix}" })
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {

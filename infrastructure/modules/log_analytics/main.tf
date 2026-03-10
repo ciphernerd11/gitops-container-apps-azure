@@ -5,6 +5,6 @@ resource "azurerm_log_analytics_workspace" "main" {
   sku                 = "PerGB2018"
   retention_in_days   = 30
 
-  tags = var.tags
+  tags = merge(var.tags, { Name = "law-${var.resource_prefix}" })
 }
 

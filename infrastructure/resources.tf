@@ -3,13 +3,15 @@
 # ─────────────────────────────────────────────────────
 
 locals {
-  resource_prefix = "${var.project_name}-${var.environment}"
+  name_prefix = "${var.project_name}-${var.environment}"
+}
 
-  common_tags = merge(var.tags, {
-    Project     = var.project_name
-    Environment = var.environment
-    ManagedBy   = "terraform"
-  })
+module "tags" {
+  source      = "./modules/tag"
+  environment = var.environment
+  project     = var.project_name
+  owner       = var.owner
+  cost_center = var.cost_center
 }
 
 # ─────────────────────────────────────────────────────
@@ -17,21 +19,21 @@ locals {
 # ─────────────────────────────────────────────────────
 
 resource "azurerm_resource_group" "main" {
-  name     = "rg-${local.resource_prefix}"
+  name     = "rg-${local.name_prefix}"
   location = var.location
-  tags     = local.common_tags
+  tags     = merge(module.tags.tags, { Name = "rg-${local.name_prefix}" })
 }
 
 module "network" {
   source              = "./modules/network"
-  resource_prefix     = local.resource_prefix
+  resource_prefix     = local.name_prefix
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   vnet_cidr           = var.vnet_cidr
   app_subnets_cidr    = var.app_subnets_cidr
   db_subnets_cidr     = var.db_subnets_cidr
   gateway_subnet_cidr = var.gateway_subnet_cidr
-  tags                = local.common_tags
+  tags                = module.tags.tags
 }
 
 # ─────────────────────────────────────────────────────
@@ -40,21 +42,21 @@ module "network" {
 
 module "log_analytics" {
   source              = "./modules/log_analytics"
-  resource_prefix     = local.resource_prefix
+  resource_prefix     = local.name_prefix
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  tags                = local.common_tags
+  tags                = module.tags.tags
 }
 
-  module "keyvault" {
+module "keyvault" {
   source              = "./modules/keyvault"
-  resource_prefix     = local.resource_prefix
+  resource_prefix     = local.name_prefix
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   # Passing subnet IDs for Network ACLs
-  app_subnet_ids    = module.network.app_subnet_ids
-  allowed_ips       = var.allowed_ips
-  tags                = local.common_tags
+  app_subnet_ids = module.network.app_subnet_ids
+  allowed_ips    = var.allowed_ips
+  tags           = module.tags.tags
 }
 
 # ─────────────────────────────────────────────────────
@@ -63,16 +65,16 @@ module "log_analytics" {
 
 module "acr" {
   source              = "./modules/acr"
-  resource_prefix     = local.resource_prefix
+  resource_prefix     = local.name_prefix
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   acr_sku             = var.acr_sku
-  tags                = local.common_tags
+  tags                = module.tags.tags
 }
 
 module "aks" {
   source                     = "./modules/aks"
-  resource_prefix            = local.resource_prefix
+  resource_prefix            = local.name_prefix
   resource_group_name        = azurerm_resource_group.main.name
   location                   = azurerm_resource_group.main.location
   kubernetes_version         = var.kubernetes_version
@@ -84,7 +86,7 @@ module "aks" {
   vnet_subnet_id             = module.network.app_subnet_ids[0]
   gateway_subnet_id          = module.network.gateway_subnet_id
   log_analytics_workspace_id = module.log_analytics.workspace_id
-  tags                       = local.common_tags
+  tags                       = module.tags.tags
 }
 
 # ─────────────────────────────────────────────────────

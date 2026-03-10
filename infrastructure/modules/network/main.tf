@@ -3,7 +3,7 @@ resource "azurerm_virtual_network" "main" {
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = var.vnet_cidr
-  tags                = var.tags
+  tags                = merge(var.tags, { Name = "vnet-${var.resource_prefix}" })
 }
 
 # 1. Gateway Subnet (For Ingress)
@@ -43,21 +43,21 @@ resource "azurerm_network_security_group" "app" {
   name                = "nsg-app-${var.resource_prefix}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = var.tags
+  tags                = merge(var.tags, { Name = "nsg-app-${var.resource_prefix}" })
 }
 
 resource "azurerm_network_security_group" "db" {
   name                = "nsg-db-${var.resource_prefix}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = var.tags
+  tags                = merge(var.tags, { Name = "nsg-db-${var.resource_prefix}" })
 }
 
 resource "azurerm_network_security_group" "gateway" {
   name                = "nsg-gw-${var.resource_prefix}"
   location            = var.location
   resource_group_name = var.resource_group_name
-  tags                = var.tags
+  tags                = merge(var.tags, { Name = "nsg-gw-${var.resource_prefix}" })
 }
 
 # Association
