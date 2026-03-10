@@ -1,0 +1,62 @@
+name: Alert Generator CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/alert-generator/**'
+      - 'kube/alert-generator-cronjob.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/alert-generator/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options: [dev, qa, uat, prod]
+
+env:
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  REGISTRY: ${{ secrets.ACR_NAME }}.azurecr.io
+  SERVICE_NAME: alert-generator
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - run: az acr login --name $ACR_NAME
+      - name: Build & Push
+        run: |
+          docker build -t $REGISTRY/$SERVICE_NAME:${{ github.sha }} ./src/$SERVICE_NAME
+          docker push $REGISTRY/$SERVICE_NAME:${{ github.sha }}
+
+  update-manifest:
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+      - name: Update Tag
+        run: |
+          yq -i '.spec.jobTemplate.spec.template.spec.containers[0].image = "'$REGISTRY'/'$SERVICE_NAME':'${{ github.sha }}'"' kube/alert-generator-cronjob.yaml
+      - name: Commit & Push
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add kube/
+          git diff --cached --quiet && echo "No changes" || (git commit -m "ci: update $SERVICE_NAME tag to ${{ github.sha }} [skip ci]" && git push)
