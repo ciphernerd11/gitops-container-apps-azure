@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to deploy (dev, qa, uat, prod)'
+        description: "Environment to deploy (dev, qa, uat, prod)"
         required: true
-        default: 'dev'
+        default: "dev"
         type: choice
         options:
-        - dev
-        - qa
-        - uat
-        - prod
+          - dev
+          - qa
+          - uat
+          - prod
   pull_request:
     branches: [main]
     paths:
-      - 'infrastructure/**'
+      - "infrastructure/**"
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -27,7 +27,7 @@ env:
 
 jobs:
   terraform-plan:
-    name: 'Terraform Plan'
+    name: "Terraform Plan"
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,24 +47,26 @@ jobs:
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
+      - name: Get Public IP
+        id: ip
+        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
       - name: Terraform Init
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           terraform init -backend-config="key=${ENV_NAME}.tfstate"
-
-      - name: Get Public IP
-        id: ip
-        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
 
       - name: Pre-Whitelist Runner IP (if Vault exists)
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           KV_NAME="kv-disasterrelief${ENV_NAME}"
           if az keyvault show --name "$KV_NAME" &>/dev/null; then
+            echo "Whitelisting IP ${{ steps.ip.outputs.ipv4 }} on $KV_NAME..."
             az keyvault network-rule add --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}"
-            sleep 10
+            echo "Waiting 30s for Azure Firewall propagation..."
+            sleep 30
           else
-            echo "Key Vault '$KV_NAME' not found. Skipping whitelisting."
+            echo "Key Vault '$KV_NAME' not found. This might be a fresh infra creation."
           fi
 
       - name: Terraform Plan
@@ -73,8 +75,15 @@ jobs:
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           terraform plan -var-file="environments/$ENV_NAME.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -no-color
 
+      - name: Cleanup Whitelist
+        if: always()
+        run: |
+          ENV_NAME="{{ github.event.inputs.environment || 'dev' }}"
+          KV_NAME="kv-disasterrelief${ENV_NAME}"
+          az keyvault network-rule remove --name "$KV_NAME" --ip-address "{{ steps.ip.outputs.ipv4 }}" || true
+
   terraform-apply:
-    name: 'Terraform Apply'
+    name: "Terraform Apply"
     needs: terraform-plan
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
@@ -97,42 +106,51 @@ jobs:
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
+      - name: Get Public IP
+        id: ip
+        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
+
       - name: Terraform Init
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           terraform init -backend-config="key=${ENV_NAME}.tfstate"
 
-      - name: Get Public IP
-        id: ip
-        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
-
       - name: Pre-Whitelist Runner IP (if Vault exists)
         run: |
           if az keyvault show --name "kv-disasterreliefdev" &>/dev/null; then
+            echo "Whitelisting IP ${{ steps.ip.outputs.ipv4 }} on $KV_NAME..."
             az keyvault network-rule add --name "kv-disasterreliefdev" --ip-address "${{ steps.ip.outputs.ipv4 }}"
-            sleep 10
+            echo "Waiting 30s for Azure Firewall propagation..."
+            sleep 30
           else
-            echo "Key Vault 'kv-disasterreliefdev' not found. Skipping whitelisting."
+            echo "Key Vault '$KV_NAME' not found."
           fi
 
       - name: Terraform Apply
         run: terraform apply -var-file="environments/${{ github.event.inputs.environment }}.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -auto-approve -input=false
 
-  trigger-apps:
-    name: 'Trigger Applications'
-    needs: terraform-apply
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Trigger App Workflows
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup Whitelist
+        if: always()
         run: |
-          workflows=("frontend-ci.yml" "alert-api-ci.yml" "resource-api-ci.yml" "notification-worker-ci.yml" "alert-generator-ci.yml")
-          for workflow in "${workflows[@]}"; do
-            echo "Triggering $workflow..."
-            gh workflow run "$workflow" --repo ${{ github.repository }} --ref main -f environment=${{ github.event.inputs.environment }}
-          done
+          ENV_NAME="${{ github.event.inputs.environment }}"
+          KV_NAME="kv-disasterrelief${ENV_NAME}"
+          az keyvault network-rule remove --name "$KV_NAME" --ip-address "{{ steps.ip.outputs.ipv4 }}" || true
+
+  # trigger-apps:
+  #   name: "Trigger Applications"
+  #   needs: terraform-apply
+  #   if: github.event_name == 'workflow_dispatch'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Trigger App Workflows
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         workflows=("frontend-ci.yml" "alert-api-ci.yml" "resource-api-ci.yml" "notification-worker-ci.yml" "alert-generator-ci.yml")
+  #         for workflow in "${workflows[@]}"; do
+  #           echo "Triggering $workflow..."
+  #           gh workflow run "$workflow" --repo ${{ github.repository }} --ref main -f environment=${{ github.event.inputs.environment }}
+  #         done
