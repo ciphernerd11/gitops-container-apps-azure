@@ -126,11 +126,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Trigger App Workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           workflows=("frontend-ci.yml" "alert-api-ci.yml" "resource-api-ci.yml" "notification-worker-ci.yml" "alert-generator-ci.yml")
-          for wf in "${workflows[@]}"; do
-            echo "Triggering $wf..."
-            gh workflow run "$wf" --repo ${{ github.repository }} --ref main -f environment=${{ github.event.inputs.environment }}
+          for workflow in "${workflows[@]}"; do
+            echo "Triggering $workflow..."
+            gh workflow run "$workflow" --repo ${{ github.repository }} --ref main -f environment=${{ github.event.inputs.environment }}
           done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
