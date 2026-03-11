@@ -9,4 +9,4 @@ resources:
 images:
 - name: acrdisasterreliefdev.azurecr.io/alert-api
   newName: acrdisasterreliefdev.azurecr.io/alert-api
-  newTag: alert-api-b0192e55
+  newTag: alert-api-b6bd057e
