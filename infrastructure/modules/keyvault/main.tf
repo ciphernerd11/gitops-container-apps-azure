@@ -24,6 +24,8 @@ variable "tags" {
   type = map(string)
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "azurerm_key_vault" "kv" {
   name                        = "kv-${substr(replace(var.resource_prefix, "-", ""), 0, 20)}"
   location                    = var.location
@@ -35,10 +37,8 @@ resource "azurerm_key_vault" "kv" {
 
   sku_name = "standard"
 
-  # We will use RBAC instead of Access Policies for better management
   enable_rbac_authorization = true
 
-  # Hardening KV with Network ACLs
   network_acls {
     bypass                     = "AzureServices"
     default_action             = (length(var.app_subnet_ids) > 0 || length(var.allowed_ips) > 0) ? "Deny" : "Allow"
@@ -46,7 +46,7 @@ resource "azurerm_key_vault" "kv" {
     ip_rules                   = var.allowed_ips
   }
 
-  public_network_access_enabled = true # Required to allow traffic to reach the firewall rules
+  public_network_access_enabled = true
 
   tags = merge(var.tags, { Name = "kv-${substr(replace(var.resource_prefix, "-", ""), 0, 20)}" })
 
@@ -58,21 +58,35 @@ resource "azurerm_key_vault" "kv" {
   }
 }
 
-data "azurerm_client_config" "current" {}
-
 resource "azurerm_role_assignment" "terraform_kv_admin" {
   scope                = azurerm_key_vault.kv.id
   role_definition_name = "Key Vault Administrator"
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+# --- INTEGRATED WAIT LOGIC START ---
+# This resource forces a pause to let Azure networking and RBAC sync.
+resource "terraform_data" "wait_for_access" {
+  input = azurerm_role_assignment.terraform_kv_admin.id
+
+  provisioner "local-exec" {
+    command = "sleep 60"
+  }
+
+  depends_on = [
+    azurerm_role_assignment.terraform_kv_admin,
+    azurerm_key_vault.kv
+  ]
+}
+# --- INTEGRATED WAIT LOGIC END ---
+
 resource "azurerm_key_vault_secret" "postgres_password" {
   name         = "postgres-password"
   value        = "Pass@123"
   key_vault_id = azurerm_key_vault.kv.id
 
-  # Ensure permissions are granted before trying to manage secrets
-  depends_on = [azurerm_role_assignment.terraform_kv_admin]
+  # Update this to depend on the wait resource instead of directly on the role
+  depends_on = [terraform_data.wait_for_access]
 }
 
 output "id" {
@@ -86,4 +100,3 @@ output "name" {
 output "vault_uri" {
   value = azurerm_key_vault.kv.vault_uri
 }
-
