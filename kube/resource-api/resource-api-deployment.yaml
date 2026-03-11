@@ -66,9 +66,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
-        - name: secrets-store-inline
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "postgres-kv-sync"
+#        - name: secrets-store-inline
+#          csi:
+#            driver: secrets-store.csi.k8s.io
+#            readOnly: true
+#            volumeAttributes:
+#              secretProviderClass: "postgres-kv-sync"
