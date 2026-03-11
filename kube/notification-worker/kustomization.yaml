@@ -8,4 +8,4 @@ resources:
 images:
 - name: acrdisasterreliefdev.azurecr.io/notification-worker
   newName: acrdisasterreliefdev.azurecr.io/notification-worker
-  newTag: notification-worker-db4e2a5f
+  newTag: notification-worker-7f36558a
