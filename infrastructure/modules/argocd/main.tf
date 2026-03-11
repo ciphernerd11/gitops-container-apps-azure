@@ -31,7 +31,7 @@ resource "azurerm_federated_identity_credential" "agic" {
   audience            = ["api://AzureADTokenExchange"]
   issuer              = var.oidc_issuer_url
   parent_id           = var.agic_identity_id
-  subject             = "system:serviceaccount:kube-system:agic-sa"
+  subject             = "system:serviceaccount:kube-system:agic-sa-ingress-azure"
 }
 
 resource "helm_release" "agic" {
