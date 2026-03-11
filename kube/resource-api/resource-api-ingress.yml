@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: resource-api-ingress
   annotations:
-    # AGIC uses ingressClassName instead of the annotation in newer versions
+    appgw.ingress.kubernetes.io/backend-path-prefix: "/resources"
 spec:
   ingressClassName: azure-application-gateway
 
