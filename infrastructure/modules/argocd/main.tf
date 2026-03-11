@@ -35,10 +35,13 @@ resource "azurerm_federated_identity_credential" "agic" {
 }
 
 resource "helm_release" "agic" {
-  name       = "agic"
-  chart      = "oci://mcr.microsoft.com/azure-application-gateway/charts/ingress-azure"
-  namespace  = "kube-system"
-  version    = "1.7.2"
+  name             = "agic"
+  repository       = "oci://mcr.microsoft.com/azure-application-gateway/charts"
+  chart            = "ingress-azure"
+  namespace        = "kube-system"
+  version          = "1.7.2"
+  create_namespace = true
+  timeout          = 900
 
   set {
     name  = "appgw.name"
@@ -58,6 +61,11 @@ resource "helm_release" "agic" {
   set {
     name  = "armAuth.type"
     value = "workloadIdentity"
+  }
+
+  set {
+    name  = "armAuth.identityResourceID"
+    value = var.agic_identity_id
   }
 
   set {
