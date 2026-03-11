@@ -11,7 +11,7 @@ spec:
   tls:
     - hosts:
         - argocd.disaster-relief.com
-      secretName: disaster-relief-tls
+      secretName: argocd-tls
   rules:
   - host: argocd.disaster-relief.com
     http:
