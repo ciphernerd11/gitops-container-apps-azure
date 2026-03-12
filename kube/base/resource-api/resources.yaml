@@ -17,10 +17,7 @@ spec:
         app.kubernetes.io/name: resource-api
         app.kubernetes.io/part-of: disaster-relief
         app.kubernetes.io/component: backend
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
-        prometheus.io/path: "/metrics"
+
     spec:
       containers:
         - name: resource-api
@@ -61,31 +58,17 @@ spec:
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
-      volumes: []
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: resource-api-ingress
-  annotations:
-    appgw.ingress.kubernetes.io/backend-path-prefix: "/resources"
-spec:
-  ingressClassName: azure-application-gateway
-  tls:
-    - hosts:
-        - disaster-relief.com
-      secretName: disaster-relief-tls
-  rules:
-    - host: disaster-relief.com
-      http:
-        paths:
-          - path: /api/resources
-            pathType: Prefix
-            backend:
-              service:
-                name: resource-api-service
-                port:
-                  number: 3000
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets
+              readOnly: true
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-kv-provider
 ---
 apiVersion: v1
 kind: Service

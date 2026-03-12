@@ -50,6 +50,11 @@ jobs:
         with:
           terraform_version: "1.7.5"
 
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
       - name: Terraform Init
         run: |
           # Use override if provided, otherwise default to ENV.tfstate
@@ -64,11 +69,6 @@ jobs:
 
           echo "Initializing with state key: $SELECTED_KEY"
           terraform init -backend-config="key=$SELECTED_KEY"
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Get Public IP
         id: ip

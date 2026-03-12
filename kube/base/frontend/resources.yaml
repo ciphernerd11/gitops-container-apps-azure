@@ -17,10 +17,6 @@ spec:
         app.kubernetes.io/name: frontend
         app.kubernetes.io/part-of: disaster-relief
         app.kubernetes.io/component: ui
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "80"
-        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: frontend

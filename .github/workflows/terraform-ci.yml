@@ -132,6 +132,16 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -var-file="environments/${{ github.event.inputs.environment }}.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -auto-approve -input=false
 
+      - name: Get AKS Credentials
+        run: |
+          RG_NAME=$(terraform output -raw resource_group_name)
+          AKS_NAME=$(terraform output -raw aks_cluster_name)
+          az aks get-credentials --resource-group "$RG_NAME" --name "$AKS_NAME" --overwrite-existing
+
+      - name: Apply ArgoCD Applications
+        run: |
+          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
+          kubectl apply -f ../argocd/$ENV_NAME/
       - name: Cleanup Whitelist
         if: always()
         run: |
