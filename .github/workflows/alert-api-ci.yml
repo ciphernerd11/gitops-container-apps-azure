@@ -5,7 +5,8 @@ on:
     branches: [main]
     paths:
       - 'src/alert-api/**'
-      - 'kube/alert-api/**'
+      - 'kube/dev/alert-api/**'
+      - 'kube/base/alert-api/**'
   pull_request:
     branches: [main]
     paths:
@@ -49,7 +50,7 @@ jobs:
       
       - name: Update Dev Manifest
         run: |
-          cd kube/$SERVICE_NAME/overlays/dev
+          cd kube/dev/$SERVICE_NAME
           kustomize edit set image $DEV_ACR.azurecr.io/$SERVICE_NAME=$DEV_ACR.azurecr.io/$SERVICE_NAME:$IMAGE_TAG
       
       - name: Commit & Push

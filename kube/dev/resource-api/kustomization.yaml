@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: dev
+
+resources:
+- ../../base/resource-api
+- ../namespace.yaml
+- ../secret-provider.yaml
+
+patches:
+- target:
+    kind: Ingress
+    name: resource-api-ingress
+  patch: |-
+    - op: replace
+      path: /spec/rules/0/host
+      value: dev-api.disaster-relief.com
+    - op: replace
+      path: /spec/tls/0/hosts/0
+      value: dev-api.disaster-relief.com

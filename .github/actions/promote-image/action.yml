@@ -45,7 +45,7 @@ runs:
     - name: Update Kustomize Tag
       shell: pwsh
       run: |
-        $targetDir = "kube/${{ inputs.service_name }}/overlays/${{ inputs.target_env }}"
+        $targetDir = "kube/${{ inputs.target_env }}/${{ inputs.service_name }}"
         $targetRegistry = "${{ inputs.target_acr }}.azurecr.io"
         $devRegistry = "${{ inputs.dev_acr }}.azurecr.io"
         
