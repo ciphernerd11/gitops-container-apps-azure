@@ -20,4 +20,4 @@ patches:
 images:
 - name: acrdisasterreliefdev.azurecr.io/alert-api
   newName: acrdisasterreliefdev.azurecr.io/alert-api
-  newTag: alert-api-21c71c99
+  newTag: alert-api-515942ef
