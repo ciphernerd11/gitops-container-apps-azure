@@ -4,8 +4,7 @@ namespace: dev
 
 resources:
 - ../../base/frontend
-- ../namespace.yaml
-- ../secret-provider.yaml
+- ../common
 
 patches:
 - patch: |-

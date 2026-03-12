@@ -4,7 +4,7 @@ namespace: dev
 
 resources:
 - ../../base/notification-worker
-- ../namespace.yaml
+- ../common
 images:
 - name: acrdisasterreliefdev.azurecr.io/notification-worker
   newName: acrdisasterreliefdev.azurecr.io/notification-worker

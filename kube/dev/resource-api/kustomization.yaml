@@ -4,8 +4,7 @@ namespace: dev
 
 resources:
 - ../../base/resource-api
-- ../namespace.yaml
-- ../secret-provider.yaml
+- ../common
 
 patches:
 - patch: |-
