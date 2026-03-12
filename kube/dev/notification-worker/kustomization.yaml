@@ -5,3 +5,7 @@ namespace: dev
 resources:
 - ../../base/notification-worker
 - ../namespace.yaml
+images:
+- name: acrdisasterreliefdev.azurecr.io/notification-worker
+  newName: acrdisasterreliefdev.azurecr.io/notification-worker
+  newTag: notification-worker-21c71c99
