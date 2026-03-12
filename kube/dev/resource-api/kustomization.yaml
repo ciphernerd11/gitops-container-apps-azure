@@ -8,13 +8,17 @@ resources:
 - ../secret-provider.yaml
 
 patches:
-- target:
-    kind: Ingress
-    name: resource-api-ingress
-  patch: |-
+- patch: |-
     - op: replace
       path: /spec/rules/0/host
       value: dev-api.disaster-relief.com
     - op: replace
       path: /spec/tls/0/hosts/0
       value: dev-api.disaster-relief.com
+  target:
+    kind: Ingress
+    name: resource-api-ingress
+images:
+- name: acrdisasterreliefdev.azurecr.io/resource-api
+  newName: acrdisasterreliefdev.azurecr.io/resource-api
+  newTag: resource-api-21c71c99
