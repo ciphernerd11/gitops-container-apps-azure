@@ -3,21 +3,21 @@ kind: Kustomization
 namespace: dev
 
 resources:
-- ../../base/frontend
-- ../common
+  - ../../base/frontend
+#- ../common
 
 patches:
-- patch: |-
-    - op: replace
-      path: /spec/rules/0/host
-      value: dev.disaster-relief.com
-    - op: replace
-      path: /spec/tls/0/hosts/0
-      value: dev.disaster-relief.com
-  target:
-    kind: Ingress
-    name: frontend-ingress
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: dev.disaster-relief.com
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: dev.disaster-relief.com
+    target:
+      kind: Ingress
+      name: frontend-ingress
 images:
-- name: acrdisasterreliefdev.azurecr.io/frontend
-  newName: acrdisasterreliefdev.azurecr.io/frontend
-  newTag: frontend-d645a08b
+  - name: acrdisasterreliefdev.azurecr.io/frontend
+    newName: acrdisasterreliefdev.azurecr.io/frontend
+    newTag: frontend-d645a08b

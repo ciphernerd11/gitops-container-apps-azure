@@ -58,17 +58,7 @@ spec:
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 10
-          volumeMounts:
-            - name: secrets-store
-              mountPath: /mnt/secrets
-              readOnly: true
-      volumes:
-        - name: secrets-store
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: azure-kv-provider
+      volumes: []
 ---
 apiVersion: v1
 kind: Service

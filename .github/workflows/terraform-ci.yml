@@ -48,40 +48,16 @@ jobs:
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
-      - name: Get Public IP
-        id: ip
-        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
-
       - name: Terraform Init
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           terraform init -backend-config="key=${ENV_NAME}.tfstate"
 
-      - name: Pre-Whitelist Runner IP (if Vault exists)
-        run: |
-          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          KV_NAME="kv-disasterrelief${ENV_NAME}"
-          if az keyvault show --name "$KV_NAME" &>/dev/null; then
-            echo "Whitelisting IP ${{ steps.ip.outputs.ipv4 }} on $KV_NAME..."
-            az keyvault network-rule add --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}"
-            echo "Waiting 60s for Azure Firewall propagation..."
-            sleep 60
-          else
-            echo "Key Vault '$KV_NAME' not found. This might be a fresh infra creation."
-          fi
-
       - name: Terraform Plan
         id: plan
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          terraform plan -var-file="environments/$ENV_NAME.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -no-color
-
-      - name: Cleanup Whitelist
-        if: always()
-        run: |
-          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          KV_NAME="kv-disasterrelief${ENV_NAME}"
-          az keyvault network-rule remove --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}" || true
+          terraform plan -var-file="environments/$ENV_NAME.tfvars" -no-color
 
   terraform-apply:
     name: "Terraform Apply"
@@ -107,30 +83,13 @@ jobs:
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
-      - name: Get Public IP
-        id: ip
-        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
-
       - name: Terraform Init
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           terraform init -backend-config="key=${ENV_NAME}.tfstate"
 
-      - name: Pre-Whitelist Runner IP (if Vault exists)
-        run: |
-          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          KV_NAME="kv-disasterrelief${ENV_NAME}"
-          if az keyvault show --name "$KV_NAME" &>/dev/null; then
-            echo "Whitelisting IP ${{ steps.ip.outputs.ipv4 }} on $KV_NAME..."
-            az keyvault network-rule add --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}"
-            echo "Waiting 60s for Azure Firewall propagation..."
-            sleep 60
-          else
-            echo "Key Vault '$KV_NAME' not found."
-          fi
-
       - name: Terraform Apply
-        run: terraform apply -var-file="environments/${{ github.event.inputs.environment }}.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -auto-approve -input=false
+        run: terraform apply -var-file="environments/${{ github.event.inputs.environment }}.tfvars" -auto-approve -input=false
 
       - name: Get AKS Credentials
         run: |
@@ -142,12 +101,6 @@ jobs:
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
           kubectl apply -f ../argocd/$ENV_NAME/
-      - name: Cleanup Whitelist
-        if: always()
-        run: |
-          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          KV_NAME="kv-disasterrelief${ENV_NAME}"
-          az keyvault network-rule remove --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}" || true
 
   # trigger-apps:
   #   name: "Trigger Applications"

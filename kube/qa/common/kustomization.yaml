@@ -4,4 +4,4 @@ namespace: qa
 
 resources:
 - namespace.yaml
-- secret-provider.yaml
+- postgres-secret.yaml

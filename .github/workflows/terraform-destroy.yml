@@ -70,22 +70,7 @@ jobs:
           echo "Initializing with state key: $SELECTED_KEY"
           terraform init -backend-config="key=$SELECTED_KEY"
 
-      - name: Get Public IP
-        id: ip
-        run: echo "ipv4=$(curl -s https://api.ipify.org)" >> $GITHUB_OUTPUT
-
-      - name: Pre-Whitelist Runner IP (if Vault exists)
-        run: |
-          ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          KV_NAME="kv-disasterrelief${ENV_NAME}"
-          if az keyvault show --name "$KV_NAME" &>/dev/null; then
-            az keyvault network-rule add --name "$KV_NAME" --ip-address "${{ steps.ip.outputs.ipv4 }}"
-            sleep 10
-          else
-            echo "Key Vault '$KV_NAME' not found. Skipping whitelisting."
-          fi
-
       - name: Terraform Destroy
         run: |
           ENV_NAME="${{ github.event.inputs.environment || 'dev' }}"
-          terraform destroy -var-file="environments/${ENV_NAME}.tfvars" -var="allowed_ips=[\"${{ steps.ip.outputs.ipv4 }}\"]" -auto-approve
+          terraform destroy -var-file="environments/${ENV_NAME}.tfvars" -auto-approve
