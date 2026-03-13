@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/component: generator
 spec:
   schedule: "*/1 * * * *"
-  concurrencyPolicy: Forbid
+  concurrencyPolicy: Replace
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -33,4 +33,3 @@ spec:
                 - name: API_URL
                   value: "http://alert-api-service:8000/alerts"
           restartPolicy: OnFailure
-

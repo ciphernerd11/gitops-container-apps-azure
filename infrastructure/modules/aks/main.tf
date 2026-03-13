@@ -1,3 +1,10 @@
+resource "azurerm_user_assigned_identity" "aks_kubelet" {
+  name                = "id-aks-kubelet-${var.resource_prefix}"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  tags                = var.tags
+}
+
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "aks-${var.resource_prefix}"
   location            = var.location
@@ -5,12 +12,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   dns_prefix          = var.resource_prefix
   kubernetes_version  = var.kubernetes_version
 
+  kubelet_identity {
+    client_id                 = azurerm_user_assigned_identity.aks_kubelet.client_id
+    user_assigned_identity_id = azurerm_user_assigned_identity.aks_kubelet.id
+    object_id                 = azurerm_user_assigned_identity.aks_kubelet.principal_id
+  }
+
   default_node_pool {
-    name           = "default"
-    node_count     = var.aks_node_count
-    vm_size        = var.aks_node_vm_size
-    vnet_subnet_id = var.vnet_subnet_id
-    os_disk_size_gb = 30
+    name                        = "default"
+    node_count                  = var.aks_node_count
+    vm_size                     = var.aks_node_vm_size
+    vnet_subnet_id              = var.vnet_subnet_id
+    os_disk_size_gb             = 30
     temporary_name_for_rotation = "tempnodepool"
   }
 
@@ -46,11 +59,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
 }
 
 resource "azurerm_role_assignment" "aks_acr_pull" {
-  principal_id                     = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+  principal_id                     = azurerm_user_assigned_identity.aks_kubelet.principal_id
   role_definition_name             = "AcrPull"
   scope                            = var.acr_id
   skip_service_principal_aad_check = true
 }
+
 
 resource "azurerm_role_assignment" "aks_kv_secrets" {
   principal_id                     = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
