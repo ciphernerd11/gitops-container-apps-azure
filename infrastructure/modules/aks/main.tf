@@ -66,6 +66,14 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "aks_identity_operator" {
+  principal_id                     = azurerm_user_assigned_identity.aks_kubelet.principal_id
+  role_definition_name             = "Managed Identity Operator"
+  scope                            = azurerm_user_assigned_identity.aks_kubelet.id
+  skip_service_principal_aad_check = true
+}
+
+
 
 resource "azurerm_role_assignment" "aks_kv_secrets" {
   principal_id                     = azurerm_kubernetes_cluster.aks.key_vault_secrets_provider[0].secret_identity[0].object_id
