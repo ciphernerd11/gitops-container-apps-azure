@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: acrdisasterreliefdev.azurecr.io/notifications-worker
-  tag: notifications-worker-6b5d3f0b
+  tag: notifications-worker-5c22437e
 
 service:
   enabled: false
