@@ -1,34 +1,26 @@
 kind: Deployment
 partOf: disaster-relief
-
 replicaCount: 1
-
 image:
   repository: acrdisasterreliefdev.azurecr.io/alert-api
-  tag: alert-api-5c22437e
-
+  tag: alert-api-eb1e65bc
 livenessProbe:
   path: /health
-
 readinessProbe:
   path: /health
-
 ports:
   - containerPort: 8000
     servicePort: 8080
     name: http
-
 service:
   enabled: true
 ingress:
   enabled: false
-
 env:
   - name: REDIS_HOST
     value: "redis-service"
   - name: REDIS_PORT
     value: "6379"
-
 resources:
   requests:
     cpu: 100m
@@ -36,4 +28,3 @@ resources:
   limits:
     cpu: 500m
     memory: 256Mi
-  
