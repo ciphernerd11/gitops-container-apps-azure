@@ -1,27 +1,20 @@
 kind: Deployment
 partOf: disaster-relief
-
 replicaCount: 1
-
 image:
   repository: acrdisasterreliefdev.azurecr.io/notifications-worker
-  tag: notifications-worker-5c22437e
-
+  tag: notifications-worker-eb1e65bc
 service:
   enabled: false
-
 livenessProbe:
   enabled: false
-
 readinessProbe:
   enabled: false
-
 env:
-- name: ALERT_API_URL
-  value: "http://alert-api-service:8000"
-- name: POLL_INTERVAL
-  value: "10s"
-
+  - name: ALERT_API_URL
+    value: "http://alert-api-service:8000"
+  - name: POLL_INTERVAL
+    value: "10s"
 resources:
-  requests: { cpu: 50m, memory: 32Mi}
-  limits: { cpu: 200m, memory: 64Mi}
+  requests: {cpu: 50m, memory: 32Mi}
+  limits: {cpu: 200m, memory: 64Mi}
