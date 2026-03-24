@@ -3,7 +3,7 @@ partOf: disaster-relief
 replicaCount: 1
 image:
   repository: acrdisasterreliefdev.azurecr.io/notifications-worker
-  tag: notifications-worker-eb1e65bc
+  tag: notifications-worker-558e63b6
 service:
   enabled: false
 ingress:
