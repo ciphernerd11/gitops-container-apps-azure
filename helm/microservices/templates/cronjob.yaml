@@ -21,7 +21,7 @@ spec:
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "stable" }}"
               {{- with .Values.env }}
               env:
-                {{- toYaml . | nindent 12 }}
+                {{- toYaml . | nindent 16 }}
               {{- end }}
               resources:
                 {{- toYaml .Values.resources | nindent 16 }}
