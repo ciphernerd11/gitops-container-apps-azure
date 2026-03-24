@@ -50,7 +50,9 @@ jobs:
       - name: Update Dev Manifest
         run: |
           VALUES_FILE="helm/values/dev-values/values-dev-alert-generator.yaml"
-          sed -i "s/tag: .*/tag: $IMAGE_TAG/" $VALUES_FILE
+          yq -i ".image.tag = \"$IMAGE_TAG\"" $VALUES_FILE
+          echo "Updated $VALUES_FILE:"
+          cat $VALUES_FILE
       
       - name: Commit & Push
         run: |

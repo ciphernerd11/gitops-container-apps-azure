@@ -56,19 +56,20 @@ runs:
         Write-Host "Updating Helm values in $valuesFile..."
         
         if (-not (Test-Path $valuesFile)) {
-            # Special case for notification-worker vs notifications-worker
             if ($serviceName -eq "notification-worker") {
                 $valuesFile = "helm/values/$targetEnv-values/values-$targetEnv-notifications-worker.yaml"
             }
         }
         
         if (Test-Path $valuesFile) {
-            # Update the tag
-            (Get-Content $valuesFile) -replace "tag: .*", "tag: $imageTag" | Set-Content $valuesFile
+            # Update the tag with quotes for safety
+            (Get-Content $valuesFile) -replace '( *tag: ).*', "`$1`"$imageTag`"" | Set-Content $valuesFile
             
-            # Update the repository/registry if necessary
-            $content = Get-Content $valuesFile
-            $content -replace "repository: .*/", "repository: $targetRegistry/" | Set-Content $valuesFile
+            # Update the repository registry
+            (Get-Content $valuesFile) -replace '( *repository: ).*/(.*)', "`$1$targetRegistry/`$2" | Set-Content $valuesFile
+            
+            Write-Host "Updated content of $valuesFile:"
+            Get-Content $valuesFile
         } else {
             Write-Error "Values file not found: $valuesFile"
             exit 1
