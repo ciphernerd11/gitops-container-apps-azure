@@ -5,7 +5,7 @@ concurrencyPolicy: Replace
 failedJobsHistoryLimit: 1
 image:
   repository: acrdisasterreliefdev.azurecr.io/alert-generator
-  tag: alert-generator-558e63b6
+  tag: alert-generator-04573d24
 service:
   enabled: false
 ingress:
