@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/ciphernerd11/gitops-aks-microservices.git'
+    repoURL: 'https://github.com/ciphernerd11/gitops-container-apps-azure.git'
     path: kube
     targetRevision: HEAD
   destination:
