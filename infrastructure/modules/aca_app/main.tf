@@ -115,7 +115,7 @@ resource "azurerm_container_app" "main" {
       dynamic "env" {
         for_each = var.secrets
         content {
-          name        = env.value.name
+          name        = upper(replace(env.value.name, "-", "_"))
           secret_name = env.value.name
         }
       }

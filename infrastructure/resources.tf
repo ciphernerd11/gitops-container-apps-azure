@@ -160,7 +160,7 @@ module "resource_api" {
     { name = "PGPORT", value = "5432" }
   ]
   secrets = [
-    { name = "PGPASSWORD", value = var.db_admin_password }
+    { name = "pgpassword", value = var.db_admin_password }
   ]
   tags = module.tags.tags
 }
@@ -210,7 +210,7 @@ module "notification_worker" {
     { name = "PGDATABASE", value = "resources" }
   ]
   secrets = [
-    { name = "PGPASSWORD", value = var.db_admin_password }
+    { name = "pgpassword", value = var.db_admin_password }
   ]
   tags = module.tags.tags
 }
