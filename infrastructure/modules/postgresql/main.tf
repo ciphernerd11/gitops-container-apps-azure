@@ -29,7 +29,7 @@ variable "admin_password" {
 
 variable "sku_name" {
   type    = string
-  default = "GP_Standard_B1ms" # Cheaper for dev
+  default = "B_Standard_B1ms" # Cheaper for dev
 }
 
 variable "storage_mb" {
