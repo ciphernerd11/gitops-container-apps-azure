@@ -20,3 +20,7 @@ tags = {
   Project     = "disaster-relief"
   Environment = "dev"
 }
+
+# Managed Services (Phase 1) — Set these values before running Terraform
+db_admin_password  = "Sealion@1204"
+# aca_vnet_subnet_id = "Optional: Use if you want to override the default ACA subnet"

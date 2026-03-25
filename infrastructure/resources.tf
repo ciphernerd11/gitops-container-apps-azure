@@ -91,7 +91,148 @@ module "aks" {
 }
 
 # ─────────────────────────────────────────────────────
-# 4. GitOps & Application Configuration
+# 4. Azure Container Apps (ACA) — Target Platform
+# ─────────────────────────────────────────────────────
+
+module "aca_environment" {
+  source                     = "./modules/aca_environment"
+  resource_prefix            = local.name_prefix
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = azurerm_resource_group.main.location
+  log_analytics_workspace_id  = module.log_analytics.workspace_id
+  vnet_subnet_id             = coalesce(var.aca_vnet_subnet_id, module.network.app_subnet_ids[1]) # Use second app subnet for ACA
+  tags                       = module.tags.tags
+}
+
+resource "azurerm_user_assigned_identity" "aca_identity" {
+  name                = "id-aca-${local.name_prefix}"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  tags                = module.tags.tags
+}
+
+resource "azurerm_role_assignment" "acr_pull" {
+  scope                = module.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.aca_identity.principal_id
+}
+
+# ─────────────────────────────────────────────────────
+# 5. Managed Data Tier (PostgreSQL & Redis)
+# ─────────────────────────────────────────────────────
+
+module "postgresql" {
+  source              = "./modules/postgresql"
+  resource_prefix     = local.name_prefix
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  vnet_id              = module.network.vnet_id
+  subnet_id           = module.network.db_subnet_ids[0]
+  admin_password      = var.db_admin_password
+  tags                = module.tags.tags
+}
+
+module "redis" {
+  source              = "./modules/redis"
+  resource_prefix     = local.name_prefix
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  tags                = module.tags.tags
+}
+
+# ─────────────────────────────────────────────────────
+# 6. Microservices (Azure Container Apps)
+# ─────────────────────────────────────────────────────
+
+module "resource_api" {
+  source                       = "./modules/aca_app"
+  name                         = "resource-api"
+  resource_group_name          = azurerm_resource_group.main.name
+  container_app_environment_id = module.aca_environment.id
+  identity_id                  = azurerm_user_assigned_identity.aca_identity.id
+  image                        = var.resource_api_image
+  container_port               = 3000
+  is_external_ingress          = false
+  env_vars = [
+    { name = "PGHOST", value = module.postgresql.fqdn },
+    { name = "PGUSER", value = "psqladmin" },
+    { name = "PGDATABASE", value = "resources" },
+    { name = "PGPORT", value = "5432" }
+  ]
+  secrets = [
+    { name = "PGPASSWORD", value = var.db_admin_password }
+  ]
+  tags = module.tags.tags
+}
+
+module "alert_api" {
+  source                       = "./modules/aca_app"
+  name                         = "alert-api"
+  resource_group_name          = azurerm_resource_group.main.name
+  container_app_environment_id = module.aca_environment.id
+  identity_id                  = azurerm_user_assigned_identity.aca_identity.id
+  image                        = var.alert_api_image
+  container_port               = 8000
+  is_external_ingress          = false
+  env_vars = [
+    { name = "REDIS_HOST", value = module.redis.hostname },
+    { name = "REDIS_PORT", value = "6379" }
+  ]
+  tags = module.tags.tags
+}
+
+module "alert_generator" {
+  source                       = "./modules/aca_app"
+  name                         = "alert-generator"
+  resource_group_name          = azurerm_resource_group.main.name
+  container_app_environment_id = module.aca_environment.id
+  identity_id                  = azurerm_user_assigned_identity.aca_identity.id
+  image                        = var.alert_generator_image
+  ingress_enabled              = false # Background worker
+  env_vars = [
+    { name = "REDIS_HOST", value = module.redis.hostname },
+    { name = "REDIS_PORT", value = "6379" }
+  ]
+  tags = module.tags.tags
+}
+
+module "notification_worker" {
+  source                       = "./modules/aca_app"
+  name                         = "notification-worker"
+  resource_group_name          = azurerm_resource_group.main.name
+  container_app_environment_id = module.aca_environment.id
+  identity_id                  = azurerm_user_assigned_identity.aca_identity.id
+  image                        = var.notification_worker_image
+  ingress_enabled              = false # Background worker
+  env_vars = [
+    { name = "PGHOST", value = module.postgresql.fqdn },
+    { name = "PGUSER", value = "psqladmin" },
+    { name = "PGDATABASE", value = "resources" }
+  ]
+  secrets = [
+    { name = "PGPASSWORD", value = var.db_admin_password }
+  ]
+  tags = module.tags.tags
+}
+
+module "frontend" {
+  source                       = "./modules/aca_app"
+  name                         = "frontend"
+  resource_group_name          = azurerm_resource_group.main.name
+  container_app_environment_id = module.aca_environment.id
+  identity_id                  = azurerm_user_assigned_identity.aca_identity.id
+  image                        = var.frontend_image
+  container_port               = 80
+  is_external_ingress          = true
+  env_vars = [
+    { name = "API_BASE_URL", value = "https://${module.resource_api.fqdn}" },
+    { name = "ALERT_API_URL", value = "https://${module.alert_api.fqdn}" }
+  ]
+  tags = module.tags.tags
+}
+
+# ─────────────────────────────────────────────────────
+# 7. GitOps & Application Configuration
 # ─────────────────────────────────────────────────────
 
 module "argocd" {

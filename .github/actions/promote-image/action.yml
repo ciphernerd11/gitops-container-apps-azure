@@ -74,3 +74,18 @@ runs:
             Write-Error "Values file not found: $valuesFile"
             exit 1
         }
+    - name: Update Target Container App
+      shell: pwsh
+      run: |
+        $targetEnv = "${{ inputs.target_env }}"
+        $serviceName = "${{ inputs.service_name }}"
+        $imageTag = "${{ inputs.image_tag }}"
+        $targetAcr = "${{ inputs.target_acr }}"
+        $rgName = "rg-disaster-relief-$targetEnv"
+        
+        Write-Host "Updating Container App $serviceName in $rgName..."
+        
+        az containerapp update `
+          --name $serviceName `
+          --resource-group $rgName `
+          --image "$targetAcr.azurecr.io/$serviceName:$imageTag"

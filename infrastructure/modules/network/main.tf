@@ -33,6 +33,18 @@ resource "azurerm_subnet" "db" {
   virtual_network_name = azurerm_virtual_network.main.name
   resource_group_name  = var.resource_group_name
   address_prefixes     = [var.db_subnets_cidr[count.index]]
+
+  # Delegation required for PostgreSQL Flexible Server (only on the first DB subnet)
+  dynamic "delegation" {
+    for_each = count.index == 0 ? [1] : []
+    content {
+      name = "delegation-psql"
+      service_delegation {
+        name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
+  }
 }
 
 # ─────────────────────────────────────────────────────

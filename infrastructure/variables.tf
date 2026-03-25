@@ -91,3 +91,38 @@ variable "cost_center" {
   type        = string
   default     = "CC-101"
 }
+variable "db_admin_password" {
+  description = "Admin password for the PostgreSQL Flexible Server"
+  type        = string
+  sensitive   = true
+}
+
+variable "aca_vnet_subnet_id" {
+  description = "Optional override for ACA subnet ID if different from AKS"
+  type        = string
+  default     = null
+}
+variable "resource_api_image" {
+  type    = string
+  default = "acrdisasterreliefdev.azurecr.io/resource-api:latest"
+}
+
+variable "alert_api_image" {
+  type    = string
+  default = "acrdisasterreliefdev.azurecr.io/alert-api:latest"
+}
+
+variable "alert_generator_image" {
+  type    = string
+  default = "acrdisasterreliefdev.azurecr.io/alert-generator:latest"
+}
+
+variable "notification_worker_image" {
+  type    = string
+  default = "acrdisasterreliefdev.azurecr.io/notification-worker:latest"
+}
+
+variable "frontend_image" {
+  type    = string
+  default = "acrdisasterreliefdev.azurecr.io/frontend:latest"
+}
