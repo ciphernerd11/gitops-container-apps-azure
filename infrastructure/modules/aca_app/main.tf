@@ -126,16 +126,16 @@ resource "azurerm_container_app" "main" {
         transport = "HTTP"
         port      = var.container_port
         path      = "/health"
-        initial_delay_seconds = 60
-        period_seconds        = 30
+        initial_delay = 60
+        period        = 30
       }
 
       readiness_probe {
         transport = "HTTP"
         port      = var.container_port
         path      = "/health"
-        initial_delay_seconds = 10
-        period_seconds        = 10
+        initial_delay = 10
+        period        = 10
       }
 
       dynamic "env" {
