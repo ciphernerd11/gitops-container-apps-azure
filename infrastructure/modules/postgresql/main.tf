@@ -63,8 +63,9 @@ resource "azurerm_postgresql_flexible_server" "main" {
   private_dns_zone_id    = azurerm_private_dns_zone.psql.id
   administrator_login    = var.admin_username
   administrator_password = var.admin_password
-  sku_name               = var.sku_name
-  storage_mb             = var.storage_mb
+  sku_name                      = var.sku_name
+  storage_mb                    = var.storage_mb
+  public_network_access_enabled = false
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.psql]
 
