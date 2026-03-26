@@ -73,6 +73,11 @@ variable "tags" {
   type = map(string)
 }
 
+variable "app_insights_connection_string" {
+  type    = string
+  default = null
+}
+
 resource "azurerm_container_app" "main" {
   name                         = var.name
   container_app_environment_id = var.container_app_environment_id
@@ -112,6 +117,27 @@ resource "azurerm_container_app" "main" {
         }
       }
 
+      env {
+        name  = "APPLICATIONINSIGHTS_CONNECTION_STRING"
+        value = var.app_insights_connection_string
+      }
+
+      liveness_probe {
+        transport = "HTTP"
+        port      = var.container_port
+        path      = "/health"
+        initial_delay_seconds = 60
+        period_seconds        = 30
+      }
+
+      readiness_probe {
+        transport = "HTTP"
+        port      = var.container_port
+        path      = "/health"
+        initial_delay_seconds = 10
+        period_seconds        = 10
+      }
+
       dynamic "env" {
         for_each = var.secrets
         content {
@@ -123,6 +149,11 @@ resource "azurerm_container_app" "main" {
 
     min_replicas = var.min_replicas
     max_replicas = var.max_replicas
+
+    http_scale_rule {
+      name                = "http-scaling-rule"
+      concurrent_requests = "100"
+    }
   }
 
   dynamic "ingress" {

@@ -48,6 +48,15 @@ module "log_analytics" {
   tags                = module.tags.tags
 }
 
+module "app_insights" {
+  source              = "./modules/app_insights"
+  resource_prefix     = local.name_prefix
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  workspace_id        = module.log_analytics.workspace_id
+  tags                = module.tags.tags
+}
+
 module "keyvault" {
   source              = "./modules/keyvault"
   resource_prefix     = local.name_prefix
@@ -57,6 +66,12 @@ module "keyvault" {
   app_subnet_ids = module.network.app_subnet_ids
   allowed_ips    = var.allowed_ips
   tags           = module.tags.tags
+}
+
+resource "azurerm_key_vault_secret" "db_password" {
+  name         = "db-password"
+  value        = var.db_admin_password
+  key_vault_id = module.keyvault.id
 }
 
 # ─────────────────────────────────────────────────────
@@ -84,6 +99,7 @@ module "aca_environment" {
   location                   = azurerm_resource_group.main.location
   log_analytics_workspace_id  = module.log_analytics.workspace_id
   vnet_subnet_id             = coalesce(var.aca_vnet_subnet_id, module.network.app_subnet_ids[1]) # Use second app subnet for ACA
+  app_insights_connection_string = module.app_insights.connection_string
   tags                       = module.tags.tags
 }
 
@@ -136,6 +152,7 @@ module "resource_api" {
   image                        = var.resource_api_image
   container_port               = 3000
   is_external_ingress          = false
+  app_insights_connection_string = module.app_insights.connection_string
   env_vars = [
     { name = "PGHOST", value = module.postgresql.fqdn },
     { name = "PGUSER", value = "psqladmin" },
@@ -143,7 +160,7 @@ module "resource_api" {
     { name = "PGPORT", value = "5432" }
   ]
   secrets = [
-    { name = "pgpassword", value = var.db_admin_password }
+    { name = "pgpassword", value = azurerm_key_vault_secret.db_password.value }
   ]
   tags = module.tags.tags
 }
@@ -157,6 +174,7 @@ module "alert_api" {
   image                        = var.alert_api_image
   container_port               = 8000
   is_external_ingress          = false
+  app_insights_connection_string = module.app_insights.connection_string
   env_vars = [
     { name = "REDIS_HOST", value = module.redis.hostname },
     { name = "REDIS_PORT", value = "6379" }
@@ -172,6 +190,7 @@ module "alert_generator" {
   identity_id                  = azurerm_user_assigned_identity.aca_identity.id
   image                        = var.alert_generator_image
   ingress_enabled              = false # Background worker
+  app_insights_connection_string = module.app_insights.connection_string
   env_vars = [
     { name = "REDIS_HOST", value = module.redis.hostname },
     { name = "REDIS_PORT", value = "6379" }
@@ -187,13 +206,14 @@ module "notification_worker" {
   identity_id                  = azurerm_user_assigned_identity.aca_identity.id
   image                        = var.notification_worker_image
   ingress_enabled              = false # Background worker
+  app_insights_connection_string = module.app_insights.connection_string
   env_vars = [
     { name = "PGHOST", value = module.postgresql.fqdn },
     { name = "PGUSER", value = "psqladmin" },
     { name = "PGDATABASE", value = "resources" }
   ]
   secrets = [
-    { name = "pgpassword", value = var.db_admin_password }
+    { name = "pgpassword", value = azurerm_key_vault_secret.db_password.value }
   ]
   tags = module.tags.tags
 }
@@ -207,6 +227,7 @@ module "frontend" {
   image                        = var.frontend_image
   container_port               = 80
   is_external_ingress          = true
+  app_insights_connection_string = module.app_insights.connection_string
   env_vars = [
     { name = "API_BASE_URL", value = "https://${module.resource_api.fqdn}" },
     { name = "ALERT_API_URL", value = "https://${module.alert_api.fqdn}" }
