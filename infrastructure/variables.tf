@@ -20,23 +20,6 @@ variable "location" {
   default     = "East US"
 }
 
-variable "aks_node_count" {
-  description = "Number of nodes in the default AKS node pool"
-  type        = number
-  default     = 2
-}
-
-variable "aks_node_vm_size" {
-  description = "VM size for AKS nodes"
-  type        = string
-  default     = "Standard_D2s_v3s"
-}
-
-variable "kubernetes_version" {
-  description = "Kubernetes version for the AKS cluster"
-  type        = string
-  default     = "1.33.7"
-}
 
 variable "acr_sku" {
   description = "SKU tier for Azure Container Registry (Basic, Standard, Premium)"

@@ -72,25 +72,6 @@ module "acr" {
   tags                = module.tags.tags
 }
 
-/*
-module "aks" {
-  source                     = "./modules/aks"
-  resource_prefix            = local.name_prefix
-  resource_group_name        = azurerm_resource_group.main.name
-  location                   = azurerm_resource_group.main.location
-  kubernetes_version         = var.kubernetes_version
-  aks_node_count             = var.aks_node_count
-  aks_node_vm_size           = var.aks_node_vm_size
-  acr_id                     = module.acr.id
-  key_vault_id               = module.keyvault.id
-  vnet_id                    = module.network.vnet_id
-  vnet_subnet_id             = module.network.app_subnet_ids[0]
-  gateway_subnet_id          = module.network.gateway_subnet_id
-  gateway_id                 = module.network.gateway_id
-  log_analytics_workspace_id = module.log_analytics.workspace_id
-  tags                       = module.tags.tags
-}
-*/
 
 # ─────────────────────────────────────────────────────
 # 4. Azure Container Apps (ACA) — Target Platform
@@ -237,20 +218,3 @@ module "frontend" {
 # 7. GitOps & Application Configuration
 # ─────────────────────────────────────────────────────
 
-/*
-module "argocd" {
-  source                     = "./modules/argocd"
-  kubernetes_host            = module.aks.kubernetes_host
-  kubelet_identity_client_id = module.aks.kubelet_identity_client_id
-  key_vault_name             = module.keyvault.name
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  subscription_id            = data.azurerm_client_config.current.subscription_id
-  resource_group_name        = azurerm_resource_group.main.name
-  gateway_name               = module.network.gateway_name
-  agic_identity_client_id    = module.aks.agic_identity_client_id
-  agic_identity_id           = module.aks.agic_identity_id
-  oidc_issuer_url            = module.aks.oidc_issuer_url
-
-  depends_on = [module.aks]
-}
-*/
