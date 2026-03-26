@@ -42,7 +42,7 @@ variable "tags" {
 }
 
 resource "azurerm_private_dns_zone" "psql" {
-  name                = "psql-${var.resource_prefix}.postgres.database.azure.com"
+  name                = "${var.resource_prefix}.postgres.database.azure.com"
   resource_group_name = var.resource_group_name
   tags                = var.tags
 }

@@ -24,6 +24,18 @@ resource "azurerm_subnet" "app" {
   
   # Enable Service Endpoints for enhanced security
   service_endpoints    = ["Microsoft.KeyVault", "Microsoft.Storage", "Microsoft.ContainerRegistry"]
+
+  # Delegation required for Azure Container Apps (only on the second app subnet)
+  dynamic "delegation" {
+    for_each = count.index == 1 ? [1] : []
+    content {
+      name = "delegation-aca"
+      service_delegation {
+        name    = "Microsoft.App/environments"
+        actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+      }
+    }
+  }
 }
 
 # 3. Database Subnet (Isolated Data Tier)
