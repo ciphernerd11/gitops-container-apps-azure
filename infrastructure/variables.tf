@@ -87,25 +87,25 @@ variable "aca_vnet_subnet_id" {
 }
 variable "resource_api_image" {
   type    = string
-  default = "acrdisasterreliefdev.azurecr.io/resource-api:latest"
+  default = "mcr.microsoft.com/k8se/quickstart:latest"
 }
 
 variable "alert_api_image" {
   type    = string
-  default = "acrdisasterreliefdev.azurecr.io/alert-api:latest"
+  default = "mcr.microsoft.com/k8se/quickstart:latest"
 }
 
 variable "alert_generator_image" {
   type    = string
-  default = "acrdisasterreliefdev.azurecr.io/alert-generator:latest"
+  default = "mcr.microsoft.com/k8se/quickstart:latest"
 }
 
 variable "notification_worker_image" {
   type    = string
-  default = "acrdisasterreliefdev.azurecr.io/notification-worker:latest"
+  default = "mcr.microsoft.com/k8se/quickstart:latest"
 }
 
 variable "frontend_image" {
   type    = string
-  default = "acrdisasterreliefdev.azurecr.io/frontend:latest"
+  default = "mcr.microsoft.com/k8se/quickstart:latest"
 }
