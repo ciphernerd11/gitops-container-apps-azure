@@ -50,7 +50,6 @@ resource "azurerm_key_vault" "kv" {
 
   tags = merge(var.tags, { Name = "kv-${substr(replace(var.resource_prefix, "-", ""), 0, 20)}" })
 
-  }
 }
 
 resource "azurerm_role_assignment" "terraform_kv_admin" {
