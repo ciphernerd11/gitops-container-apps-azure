@@ -6,6 +6,10 @@ locals {
   name_prefix = "${var.project_name}-${var.environment}"
 }
 
+data "http" "myip" {
+  url = "https://ifconfig.me/ip"
+}
+
 module "tags" {
   source      = "./modules/tag"
   environment = var.environment
@@ -64,7 +68,7 @@ module "keyvault" {
   location            = azurerm_resource_group.main.location
   # Passing subnet IDs for Network ACLs
   app_subnet_ids = module.network.app_subnet_ids
-  allowed_ips    = var.allowed_ips
+  allowed_ips    = distinct(concat(var.allowed_ips, [chomp(data.http.myip.body)]))
   tags           = module.tags.tags
 }
 
@@ -144,6 +148,7 @@ module "redis" {
 # ─────────────────────────────────────────────────────
 
 module "resource_api" {
+  # (No changes here, keeping for context)
   source                       = "./modules/aca_app"
   name                         = "resource-api"
   resource_group_name          = azurerm_resource_group.main.name

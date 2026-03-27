@@ -10,6 +10,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.90"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.0"
+    }
   }
 
   #Uncomment and configure for remote state (recommended for teams)
@@ -34,4 +38,6 @@ provider "azurerm" {
     }
   }
 }
+
+provider "http" {}
 

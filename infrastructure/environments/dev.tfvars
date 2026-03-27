@@ -16,7 +16,6 @@ tags = {
   Environment = "dev"
 }
 
-allowed_ips        = ["64.236.153.146"]
 
 # Managed Services (Phase 1) — Set these values before running Terraform
 db_admin_password  = "Sealion@1204"
