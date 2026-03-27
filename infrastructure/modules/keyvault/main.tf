@@ -50,11 +50,6 @@ resource "azurerm_key_vault" "kv" {
 
   tags = merge(var.tags, { Name = "kv-${substr(replace(var.resource_prefix, "-", ""), 0, 20)}" })
 
-  lifecycle {
-    ignore_changes = [
-      network_acls[0].ip_rules,
-      network_acls[0].virtual_network_subnet_ids
-    ]
   }
 }
 
